@@ -1,0 +1,13 @@
+server:
+  port: 8085
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 9MB
+
+amazon:
+  s3:
+    client_key: ${CLIENT_KEY}
+    secret_key: ${SECRET_KEY}
+    bucket: ${BUCKET_NAME}
