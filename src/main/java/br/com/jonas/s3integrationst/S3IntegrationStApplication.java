@@ -28,7 +28,6 @@ public class S3IntegrationStApplication {
     }
 
     @Bean
-    @Primary
     public AmazonS3 buildAmazonS3Configurations() {
         AWSCredentials credentials = new BasicAWSCredentials(
                 s3Configuration.getClientKey(),

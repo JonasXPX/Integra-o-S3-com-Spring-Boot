@@ -3,10 +3,8 @@ package br.com.jonas.s3integrationst.budget;
 import br.com.jonas.s3integrationst.budget.exception.BucketException;
 import br.com.jonas.s3integrationst.config.S3Configuration;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,14 +20,6 @@ public class BucketService {
 
     private final AmazonS3 awsS3;
     private final S3Configuration s3Configuration;
-
-    public Bucket createBudget(String budgetName) throws BucketException {
-        if(awsS3.doesBucketExistV2(budgetName)) {
-            throw new BucketException("cant create budget if already exists");
-        }
-
-        return awsS3.createBucket(budgetName);
-    }
 
     public PutObjectResult saveFile(MultipartFile file) throws BucketException {
         File tempFile = null;
