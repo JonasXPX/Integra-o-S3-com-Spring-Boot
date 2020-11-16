@@ -1,12 +1,14 @@
 package br.com.jonas.s3integrationst.budget;
 
+import br.com.jonas.s3integrationst.budget.exception.BucketException;
 import br.com.jonas.s3integrationst.config.S3Configuration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.stereotype.Component;
+import org.joda.time.DateTime;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -14,22 +16,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class BudgetOperations {
+public class BucketService {
 
     private final AmazonS3 awsS3;
     private final S3Configuration s3Configuration;
 
-    public Bucket createBudget(String budgetName) {
+    public Bucket createBudget(String budgetName) throws BucketException {
         if(awsS3.doesBucketExistV2(budgetName)) {
-            throw new RuntimeException("cant create budget if already exists");
+            throw new BucketException("cant create budget if already exists");
         }
 
         return awsS3.createBucket(budgetName);
     }
 
-    public PutObjectResult saveFile(MultipartFile file) {
+    public PutObjectResult saveFile(MultipartFile file) throws BucketException {
         File tempFile = null;
         try {
             String fileName = generateFileName(file);
@@ -39,7 +41,7 @@ public class BudgetOperations {
 
             return awsS3.putObject(s3Configuration.getBucket(), "images/" + fileName, tempFile);
         } catch (Exception e) {
-            throw new RuntimeException("não foi possível completar a ação");
+            throw new BucketException("não foi possível salvar");
         } finally {
             if(tempFile != null) {
                 try {
@@ -52,9 +54,9 @@ public class BudgetOperations {
     }
 
     private String generateFileName(MultipartFile file) throws IOException {
-        String[] formatSplit = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-        String md5Hex = DigestUtils.md5Hex(file.getBytes());
+        String[] formatSplit = Objects.requireNonNull(file.getName()).split("\\.");
+        String fileName = DateTime.now().toString("YYYY_MM_dd_hh_mm_ss_sss");
         String formatName = formatSplit[formatSplit.length - 1];
-        return md5Hex + "." + formatName;
+        return fileName + "." + formatName;
     }
 }

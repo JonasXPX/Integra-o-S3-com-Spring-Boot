@@ -11,3 +11,4 @@ amazon:
     client_key: ${CLIENT_KEY}
     secret_key: ${SECRET_KEY}
     bucket: ${BUCKET_NAME}
+    endpoint: ${AWS_S3_ENDPOINT}

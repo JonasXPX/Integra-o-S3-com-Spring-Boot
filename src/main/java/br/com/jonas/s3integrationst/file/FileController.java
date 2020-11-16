@@ -1,6 +1,6 @@
 package br.com.jonas.s3integrationst.file;
 
-import br.com.jonas.s3integrationst.budget.BudgetOperations;
+import br.com.jonas.s3integrationst.budget.BucketService;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,11 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
 
     @Autowired
-    private BudgetOperations budgetOperations;
+    private BucketService bucketService;
 
     @PostMapping
     public String uploadFile(@RequestParam MultipartFile file) {
-        PutObjectResult result = budgetOperations.saveFile(file);
+        PutObjectResult result = bucketService.saveFile(file);
         return result.getContentMd5();
     }
 }

@@ -17,4 +17,8 @@ public class S3Configuration {
 
     @Value("${amazon.s3.bucket}")
     private String bucket;
+
+    @Value("${amazon.s3.endpoint}")
+    private String endpoint;
+
 }

@@ -1,6 +1,5 @@
 package br.com.jonas.s3integrationst;
 
-import br.com.jonas.s3integrationst.budget.BudgetOperations;
 import br.com.jonas.s3integrationst.config.S3Configuration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -8,14 +7,14 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.Bucket;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -29,6 +28,7 @@ public class S3IntegrationStApplication {
     }
 
     @Bean
+    @Primary
     public AmazonS3 buildAmazonS3Configurations() {
         AWSCredentials credentials = new BasicAWSCredentials(
                 s3Configuration.getClientKey(),
@@ -40,5 +40,27 @@ public class S3IntegrationStApplication {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(Regions.US_EAST_1)
                 .build();
+    }
+
+
+    @Bean
+    public Bucket initBucket(@Autowired AmazonS3 amazonS3) {
+        if(amazonS3.doesBucketExistV2(s3Configuration.getBucket())) {
+            return getBucket(amazonS3);
+        } else {
+            return createBucket(amazonS3);
+        }
+    }
+
+
+    private Bucket getBucket(AmazonS3 amazonS3) {
+        return amazonS3.listBuckets().stream()
+                .filter(bucket -> bucket.getName().equals(s3Configuration.getBucket()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private Bucket createBucket(AmazonS3 amazonS3) {
+        return amazonS3.createBucket(s3Configuration.getBucket());
     }
 }
