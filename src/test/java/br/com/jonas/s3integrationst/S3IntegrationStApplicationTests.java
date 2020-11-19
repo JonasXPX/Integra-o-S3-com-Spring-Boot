@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.File;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -28,11 +29,11 @@ class S3IntegrationStApplicationTests {
 
     @Test
     void textRegex() {
-        String fileName = "arq.uivo-alguma.coisa definida.jpg";
+        String fileName = "Captura de tela de 2020-11-12 16-30-44.png";
 
-        String[] finalName = fileName.split("\\.");
+        String finalName = formatFileName(fileName);
 
-        assertThat(finalName).endsWith("jpg");
+        assertThat(finalName).endsWith("png");
     }
 
     @Test
@@ -50,10 +51,15 @@ class S3IntegrationStApplicationTests {
         when(mockedAmazonS3.putObject(anyString(), anyString(), (File) any())).thenReturn(result);
 
         MockMultipartFile mockMultipartFile = new MockMultipartFile("testefile.jpeg", (byte[]) null);
-        PutObjectResult saveFile = bucketService.saveFile(mockMultipartFile);
+        String saveFile = bucketService.saveFile(mockMultipartFile);
 
         assertThat(saveFile).isNotNull();
-        assertThat(saveFile.getContentMd5()).isEqualTo("test");
     }
 
+    private String formatFileName(String name) {
+        String[] formatSplit = Objects.requireNonNull(name).split("\\.");
+        String fileName = DateTime.now().toString("YYYY_MM_dd_hh_mm_ss_sss");
+        String formatName = formatSplit[formatSplit.length - 1];
+        return fileName + "." + formatName;
+    }
 }
